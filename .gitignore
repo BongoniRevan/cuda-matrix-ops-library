@@ -1,0 +1,10 @@
+*.o
+*.out
+hello_cuda
+__pycache__/
+*.pyc
+*.so
+*.egg-info/
+dist/
+build/
+.ipynb_checkpoints/
