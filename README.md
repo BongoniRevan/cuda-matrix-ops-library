@@ -84,9 +84,6 @@ ReLU and Softmax show near parity or overhead at these sizes due to PCIe memory 
     │   ├── bench_naive.py              NumPy CPU baseline
     │   ├── bench_cuda_timing.cu        CUDA event benchmarks
     │   └── final_benchmark.py          Full CUDA vs NumPy comparison
-    └── notes/
-        └── roofline_analysis.md        Performance analysis writeup
-
 ---
 
 ## Environment
@@ -132,4 +129,4 @@ This is precisely why frameworks like PyTorch batch operations and keep tensors 
 
 Writing CUDA kernels from scratch made the GPU memory hierarchy tangible in a way that using PyTorch never does. The single biggest insight was understanding why the naive matmul kernel is slow: not because the GPU is doing wrong math, but because 65,536 threads are all hammering global memory independently when they could be sharing data through shared memory.
 
-The roofline analysis in notes/roofline_analysis.md shows that matrix multiplication at large sizes is theoretically compute-bound on the T4, but the naive kernel behaves as memory-bound because of redundant global memory traffic. Shared memory tiling closes that gap by reducing effective memory traffic by a factor of TILE_SIZE.
+Matrix multiplication at large sizes is theoretically compute-bound on the T4, meaning the GPU cores should be the bottleneck, not memory. However the naive kernel behaves as if it were memory-bound because of redundant global memory traffic. Every thread independently fetches the same data from slow global memory instead of sharing it. Shared memory tiling closes that gap by reducing effective memory traffic by a factor of TILE_SIZE, allowing the compute units to stay busier and approach their theoretical peak.
